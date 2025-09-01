@@ -1,0 +1,22 @@
+# Ignora archivos sensibles y basura de compilación
+.env
+*.env
+
+# Maven
+target/*
+!target/*.jar
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Otros binarios
+*.class
+*.jar
+*.war
