@@ -1,10 +1,12 @@
 package com.example.Proyecto.Controller;
 
-import com.example.Proyecto.DTO.LoginDTO;
-import com.example.Proyecto.DTO.UsuarioEntradaDTO;
-import com.example.Proyecto.DTO.UsuarioRespuestaDTO;
+import com.example.Proyecto.DTO.*;
+import com.example.Proyecto.Model.MensajeResponse;
 import com.example.Proyecto.Model.Usuario;
+import com.example.Proyecto.Service.RegistroAlimentoService;
 import com.example.Proyecto.Service.UsuarioService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,10 @@ import java.util.*;
 @RequestMapping("/api/Usuario")
 @CrossOrigin(origins = "*")
 public class UsuarioController {
+
+    private static final Logger log = LoggerFactory.getLogger(RegistroAlimentoService.class);
+
+
     @Autowired
     public UsuarioService usuarioService;
 
@@ -231,4 +237,55 @@ public class UsuarioController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+/*
+    @PostMapping("/restablecer-contrasena")
+    public ResponseEntity<?> restablecerContrasena(@RequestBody RestablecerContrasenaDTO dto) {
+        try {
+            Usuario usuario = usuarioService.restablecerContrasena(dto);
+            return ResponseEntity.ok("Contraseña actualizada exitosamente para el usuario: " + usuario.getCorreo());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al restablecer la contraseña");
+        }
+    }
+
+ */
+
+    @PostMapping("/restablecer-contrasena")
+    public ResponseEntity<?> restablecerContrasena(@RequestBody RestablecerContrasenaDTO dto) {
+        log.info("📩 Petición recibida en /restablecer-contrasena con dto: {}", dto);
+        try {
+            Usuario usuario = usuarioService.restablecerContrasena(dto);
+            //return ResponseEntity.ok(new MensajeResponse(
+            //        "Contraseña actualizada exitosamente para el usuario: " + usuario.getCorreo()
+            //));
+            return ResponseEntity.ok(new MensajeResponse(
+                    "Contraseña actualizada exitosamente"));
+        } catch (IllegalArgumentException | NoSuchElementException e) {
+            log.error("⚠️ Error de validación: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(new MensajeResponse(e.getMessage()));
+        } catch (Exception e) {
+            log.error("💥 Error inesperado al restablecer contraseña", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MensajeResponse("Error al restablecer la contraseña"));
+        }
+    }
+
+    @PostMapping("/{id}/cambiar-contrasena")
+    public ResponseEntity<MensajeResponse> cambiarContrasena(
+            @PathVariable Long id,
+            @RequestBody CambioContrasenaDTO request) {
+        boolean exito = usuarioService.cambiarContrasena(id, request.getActual(), request.getNueva());
+
+        if (exito) {
+            return ResponseEntity.ok(new MensajeResponse("Contraseña cambiada con éxito"));
+        } else {
+            return ResponseEntity.badRequest().body(new MensajeResponse("La contraseña actual no es correcta"));
+        }
+    }
+
+
 }

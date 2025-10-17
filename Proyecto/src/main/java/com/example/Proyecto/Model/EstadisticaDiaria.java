@@ -56,6 +56,4 @@ public class EstadisticaDiaria {
     @JoinColumn(name="id_usuario", nullable = false)
     @JsonIgnore
     private Usuario usuario;
-
 }
-

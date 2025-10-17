@@ -85,9 +85,12 @@ public class RegistroAlimentoService {
 
         // Validación explícita de unidad original (evita valores inválidos)
         List<String> unidadesValidas = List.of(
-                "mg", "g", "kg", "ml", "l", "tsp", "tbsp", "cup", "oz", "lb",
-                "unidad", "porción", "rebanada", "pieza", "taza", "vaso",
-                "lonja", "filete", "puñado", "cucharada"
+                "mg", "gramos", "kg", "ml", "l", "tsp", "tbsp", "cup", "onza", "lb",
+                "unidad", "porción", "rebanada", "pieza", "taza", "vaso", "bloque",
+                "lonja", "filete", "puñado", "cucharada", "cucharadita", "puñado", "diente",
+                "taza arilos", "gajo", "taza cubos", "lata pequeña", "taza cocidos", "media docena",
+                "taza con vaina", "taza sin vaina", "chuleta", "lata", "unidad mediana", "unidad pequeña",
+                "unidad grande", "sobre polvo", "taza preparada", "bola", "taza rallado"
         );
 
         if (!unidadesValidas.contains(unidadOrigen)) {
@@ -200,6 +203,5 @@ public class RegistroAlimentoService {
         log.info("Obteniendo unidades de origen para Alimento '{}': {}", nombreAlimento, unidades);
         return unidades;
     }
-
 
 }

@@ -49,8 +49,6 @@ public class RegistroAguaService {
     }
 
     public RegistroAgua guardarRegistroAgua(RegistroAgua registroAgua){
-        // Inicializa el campo creadoEn
-        //registroAgua.setRegistradoEn(new Timestamp(System.currentTimeMillis()));
         try{
             if(registroAgua==null){
                 throw new IllegalArgumentException("El Registro de Agua no puede ser nulo");
@@ -59,11 +57,6 @@ public class RegistroAguaService {
                 if (registroAgua.getCantidadml() == 0) {
                     throw new IllegalArgumentException("La cantidad en ml del Registro de Agua es obligatorio.");
                 }
-                /*else if(registroAgua.getRegistradoEn() == null){
-                    throw new IllegalArgumentException("El timestamp del registrado en del Registro de Agua es obligatorio.");
-                }
-
-                 */
                 return  registroAguaRepository.save(registroAgua);
             }
         }catch (Exception e){

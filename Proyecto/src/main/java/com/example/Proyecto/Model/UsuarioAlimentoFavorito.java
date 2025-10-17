@@ -27,4 +27,3 @@ public class UsuarioAlimentoFavorito {
     @JoinColumn(name = "id_alimento")
     private Alimento alimento;
 }
-

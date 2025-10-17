@@ -4,7 +4,6 @@ import com.example.Proyecto.DTO.EstadisticaPorDiaDTO;
 import com.example.Proyecto.DTO.EstadisticaPorMesDTO;
 import com.example.Proyecto.DTO.NutrientesRecomendadosDTO;
 import com.example.Proyecto.DTO.NutrientesTotalesDTO;
-import com.example.Proyecto.Model.EstadisticasNutricionales;
 import com.example.Proyecto.Service.EstadisticasNutricionalesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -43,6 +42,7 @@ public class EstadisticasNutricionalesController {
         }
     }
 
+    //Usando
     @GetMapping("/recomendados/mensual/{idUsuario}/{anio}/{mes}")
     public ResponseEntity<NutrientesRecomendadosDTO> getRecomendacionesMensuales(
             @PathVariable Long idUsuario,
@@ -53,7 +53,7 @@ public class EstadisticasNutricionalesController {
         return ResponseEntity.ok(dto);
     }
 
-    //Usando
+
     @GetMapping("/totalDiaria/{idUsuario}/mes")
     public ResponseEntity<List<EstadisticaPorDiaDTO>> getConsumoPorDia(
             @PathVariable Long idUsuario,
@@ -66,6 +66,27 @@ public class EstadisticasNutricionalesController {
     }
 
     //Usando
+    @GetMapping("/totalDiariaOpt/{idUsuario}/{anio}/{mes}")
+    public ResponseEntity<List<EstadisticaPorDiaDTO>> obtenerTotalesDiariosOptimizado(
+            @PathVariable Long idUsuario,
+            @PathVariable int anio,
+            @PathVariable int mes) {
+
+        System.out.println("⚡ [Controller] Ejecutando versión OPTIMIZADA para usuario " + idUsuario);
+
+        YearMonth yearMonth = YearMonth.of(anio, mes);
+        List<EstadisticaPorDiaDTO> resultado = estadisticasService.obtenerConsumoPorDiaDelMes(idUsuario, yearMonth);
+
+        if (resultado.isEmpty()) {
+            System.out.println("🔍 [Controller] No se encontraron registros en el mes " + yearMonth);
+        } else {
+            System.out.println("📊 [Controller] Datos devueltos para " + resultado.size() + " días.");
+        }
+
+        return ResponseEntity.ok(resultado);
+    }
+
+    //Usando
     @GetMapping("/totalMes/{idUsuario}/anio")
     public ResponseEntity<List<EstadisticaPorMesDTO>> getConsumoPorMes(
             @PathVariable Long idUsuario,
@@ -74,6 +95,7 @@ public class EstadisticasNutricionalesController {
         List<EstadisticaPorMesDTO> datos = estadisticasService.obtenerConsumoPorMesDelAnio(idUsuario, anio);
         return ResponseEntity.ok(datos);
     }
+
     /**
      * Guardar o actualizar estadísticas diarias para un usuario en una fecha específica
      */
@@ -115,72 +137,6 @@ public class EstadisticasNutricionalesController {
     public ResponseEntity<String> procesarMensuales() {
         estadisticasService.procesarEstadisticasMensuales();
         return ResponseEntity.ok("⏳ Procesamiento de estadísticas mensuales ejecutado manualmente");
-    }
-
-    // Obtener estadísticas diarias calculadas desde la BD
-    @GetMapping("/diaria")
-    public ResponseEntity<EstadisticasNutricionales> obtenerEstadisticasDiarias(
-            @RequestParam Long idUsuario,
-            @RequestParam String fecha) {
-        try {
-            EstadisticasNutricionales est = estadisticasService.obtenerEstadisticasDiarias(idUsuario, fecha);
-            if (est == null) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.ok(est);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    // Obtener progreso semanal
-    @GetMapping("/progresoSemanal")
-    public ResponseEntity<List<EstadisticasNutricionales>> obtenerProgresoSemanal(
-            @RequestParam Long idUsuario,
-            @RequestParam String fechaInicio,
-            @RequestParam String fechaFin) {
-        try {
-            List<EstadisticasNutricionales> progresos =
-                    estadisticasService.obtenerProgresosSemanales(idUsuario, fechaInicio, fechaFin);
-            if (progresos.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.ok(progresos);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    // Obtener IMC
-    @GetMapping("/imc")
-    public ResponseEntity<Float> obtenerIMC(
-            @RequestParam Long idUsuario,
-            @RequestParam String fecha) {
-        try {
-            Float imc = estadisticasService.obtenerIMC(idUsuario, fecha);
-            if (imc == null) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.ok(imc);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    // Obtener total comidas registradas
-    @GetMapping("/totalComidas")
-    public ResponseEntity<Integer> obtenerTotalComidas(
-            @RequestParam Long idUsuario,
-            @RequestParam String fecha) {
-        try {
-            Integer total = estadisticasService.totalComidasRegistradas(idUsuario, fecha);
-            if (total == null) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.ok(total);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
     }
 
 }

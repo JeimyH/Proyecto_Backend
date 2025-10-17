@@ -1,8 +1,11 @@
 package com.example.Proyecto.Service;
 
+import com.example.Proyecto.DTO.RestablecerContrasenaDTO;
 import com.example.Proyecto.DTO.UsuarioEntradaDTO;
 import com.example.Proyecto.Model.Usuario;
 import com.example.Proyecto.Repository.UsuarioRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,9 @@ import java.util.Optional;
 
 @Service
 public class UsuarioService {
+
+    private static final Logger log = LoggerFactory.getLogger(UsuarioService.class);
+
     @Autowired
     public UsuarioRepository usuarioRepository;
 
@@ -170,4 +176,50 @@ public class UsuarioService {
             u.setActualizadoEn(new Timestamp(System.currentTimeMillis()));
             return usuarioRepository.save(u); }) .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado"));
     }
+
+    public Usuario restablecerContrasena(RestablecerContrasenaDTO dto) {
+        log.info("➡️ Intentando restablecer contraseña para correo: {}", dto.getCorreo());
+        log.info("Datos recibidos DTO -> correo: {}, fechaNacimiento: {}, nuevaContrasena: {}, confirmacionContrasena: {}",
+                dto.getCorreo(), dto.getFechaNacimiento(), dto.getNuevaContrasena(), dto.getConfirmacionContrasena());
+
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreo(dto.getCorreo());
+
+        if (usuarioOpt.isEmpty()) {
+            log.warn("⚠️ No se encontró usuario con correo: {}", dto.getCorreo());
+            throw new NoSuchElementException("No se encontró un usuario con el correo proporcionado");
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        log.info("✅ Usuario encontrado -> correo: {}, fechaNacimientoBD: {}", usuario.getCorreo(), usuario.getFechaNacimiento());
+
+        if (!usuario.getFechaNacimiento().equals(dto.getFechaNacimiento())) {
+            log.error("❌ Fecha de nacimiento no coincide -> DTO: {}, BD: {}", dto.getFechaNacimiento(), usuario.getFechaNacimiento());
+            throw new IllegalArgumentException("La fecha de nacimiento no coincide con nuestros registros");
+        }
+
+        if (!dto.getNuevaContrasena().equals(dto.getConfirmacionContrasena())) {
+            log.error("❌ Contraseñas no coinciden -> nueva: {}, confirmacion: {}", dto.getNuevaContrasena(), dto.getConfirmacionContrasena());
+            throw new IllegalArgumentException("Las contraseñas no coinciden");
+        }
+
+        usuario.setContrasena(passwordEncoder.encode(dto.getNuevaContrasena()));
+        usuario.setActualizadoEn(new Timestamp(System.currentTimeMillis()));
+
+        Usuario actualizado = usuarioRepository.save(usuario);
+        log.info("🔐 Contraseña actualizada correctamente para usuario {}", actualizado.getCorreo());
+
+        return actualizado;
+    }
+
+    public boolean cambiarContrasena(Long idUsuario, String actual, String nueva) {
+        return usuarioRepository.findById(idUsuario).map(usuario -> {
+            if (passwordEncoder.matches(actual, usuario.getContrasena())) {
+                usuario.setContrasena(passwordEncoder.encode(nueva)); // Guardar con hash
+                usuarioRepository.save(usuario);
+                return true;
+            }
+            return false;
+        }).orElse(false);
+    }
+
 }

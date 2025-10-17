@@ -56,4 +56,16 @@ public interface RegistroAlimentoRepository extends JpaRepository<RegistroAlimen
             @Param("inicio") LocalDateTime inicio,
             @Param("fin") LocalDateTime fin
     );
+
+    @Query("SELECT r FROM RegistroAlimento r " +
+            "JOIN FETCH r.alimento " +
+            "WHERE r.usuario.idUsuario = :idUsuario " +
+            "AND r.consumidoEn BETWEEN :inicio AND :fin " +
+            "ORDER BY r.consumidoEn ASC")
+    List<RegistroAlimento> findByUsuarioAndMes(
+            @Param("idUsuario") Long idUsuario,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fin") LocalDateTime fin
+    );
+
 }

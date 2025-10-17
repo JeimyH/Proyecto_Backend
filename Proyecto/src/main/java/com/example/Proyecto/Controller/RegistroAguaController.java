@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -19,16 +18,6 @@ import java.util.Optional;
 public class RegistroAguaController {
     @Autowired
     public RegistroAguaService registroAguaService;
-
-    @GetMapping("/listar")
-    public ResponseEntity<List<RegistroAgua>> listarRegistroAgua() {
-        List<RegistroAgua> registroAguas = registroAguaService.listarRegistrosAgua();
-        // Verificar si la lista está vacía
-        if (registroAguas.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
-        }
-        return new ResponseEntity<>(registroAguas, HttpStatus.OK); // 200 OK
-    }
 
     @GetMapping("/buscar/{id_registroAgua}")
     public ResponseEntity<RegistroAgua> listarPorIdRegistroAgua(@PathVariable long id_registroAgua){
@@ -79,6 +68,7 @@ public class RegistroAguaController {
         }
     }
 
+    // Usando
     @PostMapping("/registrar/{idUsuario}")
     public ResponseEntity<RegistroAguaRespuestaDTO> registrarAgua(
             @PathVariable Long idUsuario,
@@ -95,6 +85,7 @@ public class RegistroAguaController {
         return ResponseEntity.ok(dto);
     }
 
+    // Usando
     @GetMapping("/obtener/{idUsuario}/hoy")
     public ResponseEntity<RegistroAguaRespuestaDTO> obtenerRegistroDeHoy(@PathVariable Long idUsuario) {
         RegistroAgua registro = registroAguaService.obtenerRegistroDeHoy(idUsuario);
@@ -111,6 +102,7 @@ public class RegistroAguaController {
         return ResponseEntity.ok(dto);
     }
 
+    // Usando
     @DeleteMapping("/eliminar/{idUsuario}/hoy")
     public ResponseEntity<Void> eliminarRegistroDeHoy(@PathVariable Long idUsuario) {
         registroAguaService.eliminarRegistroDeHoy(idUsuario);

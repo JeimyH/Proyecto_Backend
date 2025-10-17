@@ -25,30 +25,6 @@ public class RegistroAlimentoController {
     @Autowired
     private RegistroAlimentoService registroAlimentoService;
 
-    /*
-    @PostMapping("/registro")
-    public ResponseEntity<RegistroAlimentoSalidaDTO> registrarAlimento(@RequestBody RegistroAlimentoEntradaDTO dto) {
-        try {
-            log.info("🟢 Recibido registro: ID Usuario={}, ID Alimento={}, Cantidad={}, Unidad={}, CantidadOriginal={}, UnidadOriginal={} Momento={}",
-                    dto.getIdUsuario(), dto.getIdAlimento(), dto.getTamanoPorcion(),
-                    dto.getUnidadMedida(), dto.getTamanoOriginal(), dto.getUnidadOriginal(), dto.getMomentoDelDia());
-
-            RegistroAlimento nuevo = registroAlimentoService.guardarRegistro(dto);
-
-            RegistroAlimentoSalidaDTO salida = new RegistroAlimentoSalidaDTO(nuevo);
-            log.info("✅ Registro guardado: ID={}, {} {} - Original: {} {} - Fecha={}",
-                    salida.getIdRegistroAlimento(), salida.getTamanoPorcion(), salida.getUnidadMedida(),
-                    nuevo.getTamanoOriginal(), nuevo.getUnidadOriginal(), salida.getConsumidoEn());
-
-            return ResponseEntity.ok(salida);
-        } catch (Exception e) {
-            log.error("❌ Error registrando alimento: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-     */
-
     @PostMapping("/registro")
     public ResponseEntity<?> registrarAlimento(@RequestBody RegistroAlimentoEntradaDTO dto) {
         try {

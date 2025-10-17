@@ -30,5 +30,4 @@ public class AlimentoReciente {
     @ManyToOne
     @JoinColumn(name = "id_alimento", nullable = false)
     private Alimento alimento;
-
 }

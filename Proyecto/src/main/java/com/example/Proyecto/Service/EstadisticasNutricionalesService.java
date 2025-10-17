@@ -9,7 +9,6 @@ import com.example.Proyecto.Repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class EstadisticasNutricionalesService {
-    @Autowired
-    public EstadisticasNutricionalesRepository estadisticasNutricionalesRepository;
 
     @Autowired
     public EstadisticaDiariaRepository estadisticaDiariaRepository;
@@ -38,26 +35,7 @@ public class EstadisticasNutricionalesService {
     @Autowired
     public UsuarioRepository usuarioRepository;
 
-    @Autowired
-    public RegistroAguaRepository registroAguaRepository;
-
     private static final Logger log = LoggerFactory.getLogger(EstadisticasNutricionalesService.class);
-
-    public EstadisticasNutricionales obtenerEstadisticasDiarias(@Param("idUsuario") Long idUsuario, @Param("fecha") String fecha){
-        return estadisticasNutricionalesRepository.calcularEstadisticasDiarias(idUsuario,fecha);
-    }
-
-    public List<EstadisticasNutricionales> obtenerProgresosSemanales(@Param("idUsuario") Long idUsuario,@Param("fechaInicio") String fechaInicio,@Param("fechaFin") String fechaFin){
-        return estadisticasNutricionalesRepository.obtenerProgresoSemanal(idUsuario,fechaInicio,fechaFin);
-    }
-
-    public Float obtenerIMC(@Param("idUsuario") Long idUsuario, @Param("fecha") String fecha){
-        return estadisticasNutricionalesRepository.calcularIMC(idUsuario,fecha);
-    }
-
-    public Integer totalComidasRegistradas(@Param("idUsuario") Long idUsuario, @Param("fecha") String fecha){
-        return estadisticasNutricionalesRepository.obtenerTotalComidasRegistradas(idUsuario,fecha);
-    }
 
     // justo después de crear el DTO
     private void inicializarTotales(NutrientesTotalesDTO t) {
@@ -136,12 +114,14 @@ public class EstadisticasNutricionalesService {
         return f == null ? 0f : f;
     }
 
+    /*
     private String totalesToString(NutrientesTotalesDTO t) {
         return String.format(Locale.US,
                 "cal=%.2f | prot=%.2f | carb=%.2f | gras=%.2f | azu=%.2f | fib=%.2f | sod=%.2f | grasSat=%.2f",
                 t.getCalorias(), t.getProteinas(), t.getCarbohidratos(), t.getGrasas(),
                 t.getAzucares(), t.getFibra(), t.getSodio(), t.getGrasasSaturadas());
     }
+    */
 
     public NutrientesRecomendadosDTO calcularRecomendacionesDiarias(Long idUsuario) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
@@ -238,14 +218,18 @@ public class EstadisticasNutricionalesService {
             // Otros valores se manejan como estándar
         }
 
+        // Macronutrientes (proteínas, carbohidratos, grasas) se ajustan a la energía total y objetivos individuales (ej. ganancia muscular, pérdida de peso, keto).
         float proteinas = (calorias * porcProte) / 4f;
         float carbohidratos = (calorias * porcCarb) / 4f;
         float grasas = (calorias * porcGrasa) / 9f;
 
         float azucares = (calorias * 0.10f) / 4f;
         float fibra = calorias / 1000f * 14f;
-        float sodio = 1500f;
         float grasasSaturadas = (calorias * 0.10f) / 9f;
+
+        // El sodio se personaliza al mismo nivel que macronutrientes (proteínas, carbohidratos, grasas)
+        // porque las recomendaciones de sodio se basan más en salud cardiovascular y límites de seguridad que en gasto energético o peso corporal.
+        float sodio = 1500f;
 
         System.out.println("🔢 Calorías: " + calorias);
         System.out.println("🍗 Proteínas (g): " + proteinas);
@@ -303,7 +287,9 @@ public class EstadisticasNutricionalesService {
         );
     }
 
+    /*
     // Obtener consumo por día en un mes
+    @Transactional(readOnly = true)
     public List<EstadisticaPorDiaDTO> obtenerConsumoPorDiaDelMes(Long idUsuario, YearMonth mes) {
         List<EstadisticaPorDiaDTO> resultados = new ArrayList<>();
 
@@ -315,38 +301,107 @@ public class EstadisticasNutricionalesService {
 
         return resultados;
     }
-
-    /*
-    // Obtener consumo por mes en un año
-    public List<EstadisticaPorMesDTO> obtenerConsumoPorMesDelAnio(Long idUsuario, int anio) {
-        List<EstadisticaPorMesDTO> resultados = new ArrayList<>();
-
-        for (int mes = 1; mes <= 12; mes++) {
-            YearMonth yearMonth = YearMonth.of(anio, mes);
-            NutrientesTotalesDTO acumulados = new NutrientesTotalesDTO();
-
-            for (int dia = 1; dia <= yearMonth.lengthOfMonth(); dia++) {
-                LocalDate fecha = yearMonth.atDay(dia);
-                NutrientesTotalesDTO diarios = obtenerTotalesPorFecha(idUsuario, fecha);
-
-                acumulados.setCalorias(acumulados.getCalorias() + diarios.getCalorias());
-                acumulados.setProteinas(acumulados.getProteinas() + diarios.getProteinas());
-                acumulados.setCarbohidratos(acumulados.getCarbohidratos() + diarios.getCarbohidratos());
-                acumulados.setGrasas(acumulados.getGrasas() + diarios.getGrasas());
-                acumulados.setAzucares(acumulados.getAzucares() + diarios.getAzucares());
-                acumulados.setFibra(acumulados.getFibra() + diarios.getFibra());
-                acumulados.setSodio(acumulados.getSodio() + diarios.getSodio());
-                acumulados.setGrasasSaturadas(acumulados.getGrasasSaturadas() + diarios.getGrasasSaturadas());
-            }
-
-            resultados.add(new EstadisticaPorMesDTO(mes, acumulados));
-        }
-
-        return resultados;
-    }
     */
 
-    // En tu Service
+    @Transactional(readOnly = true)
+    public List<EstadisticaPorDiaDTO> obtenerConsumoPorDiaDelMes(Long idUsuario, YearMonth mes) {
+        System.out.println("🚀 [OPTIMIZADO] Consultando registros del mes completo en una sola llamada...");
+
+        LocalDateTime inicioMes = mes.atDay(1).atStartOfDay();
+        LocalDateTime finMes = mes.atEndOfMonth().atTime(LocalTime.MAX);
+
+        // 🔹 1️⃣ Traer todos los registros del mes
+        List<RegistroAlimento> registros = registroAlimentoRepository.findByUsuarioAndMes(idUsuario, inicioMes, finMes);
+
+        System.out.println("📦 Total de registros encontrados: " + registros.size());
+
+        // 🔹 2️⃣ Agrupar por día
+        Map<LocalDate, List<RegistroAlimento>> registrosPorDia = registros.stream()
+                .collect(Collectors.groupingBy(r -> r.getConsumidoEn().toLocalDate()));
+
+        List<EstadisticaPorDiaDTO> resultados = new ArrayList<>();
+
+        // 🔹 3️⃣ Recorrer cada día del mes y calcular totales
+        for (int dia = 1; dia <= mes.lengthOfMonth(); dia++) {
+            LocalDate fecha = mes.atDay(dia);
+            List<RegistroAlimento> registrosDia = registrosPorDia.getOrDefault(fecha, Collections.emptyList());
+
+            NutrientesTotalesDTO totales = calcularTotales(registrosDia);
+            resultados.add(new EstadisticaPorDiaDTO(dia, totales));
+        }
+
+        System.out.println("✅ [OK] Totales diarios calculados correctamente para el mes " + mes);
+        return resultados;
+    }
+
+    private NutrientesTotalesDTO calcularTotales(List<RegistroAlimento> registros) {
+        NutrientesTotalesDTO totales = new NutrientesTotalesDTO();
+        inicializarTotales(totales);
+
+        for (RegistroAlimento registro : registros) {
+            Alimento alimento = registro.getAlimento();
+            if (alimento == null) {
+                System.out.println("⚠️ Registro sin alimento asociado: " + registro.getIdRegistroAlimento());
+                continue;
+            }
+
+            Float cantidadBase = alimento.getCantidadBase();
+            String unidadBase = alimento.getUnidadBase();
+            Float tamanoPorcion = registro.getTamanoPorcion();
+            String unidadMedida = registro.getUnidadMedida();
+
+            if (cantidadBase == null || unidadBase == null || tamanoPorcion == null || unidadMedida == null) {
+                System.out.println("⚠️ Datos incompletos para alimento: " + alimento.getNombreAlimento());
+                continue;
+            }
+
+            float factor = 1f;
+            if (!unidadBase.equalsIgnoreCase(unidadMedida)) {
+                Optional<UnidadEquivalencia> eqOpt =
+                        unidadEquivalenciaRepository.findByAlimentoAndUnidadOrigenAndUnidadDestino(
+                                alimento, unidadMedida.toLowerCase(), unidadBase.toLowerCase());
+                if (eqOpt.isPresent()) {
+                    factor = eqOpt.get().getFactorConversion();
+                } else {
+                    System.out.println("❌ No se encontró equivalencia para " + alimento.getNombreAlimento());
+                    continue;
+                }
+            }
+
+            float proporcion = (tamanoPorcion * factor) / cantidadBase;
+            if (proporcion <= 0) continue;
+
+            System.out.println("--------------------------------------------------");
+            System.out.println("🍽️ Alimento: " + alimento.getNombreAlimento());
+            System.out.println("Porción consumida: " + tamanoPorcion + " " + unidadMedida);
+            System.out.println("Unidad base: " + cantidadBase + " " + unidadBase);
+            System.out.println("Factor conversión: " + factor);
+            System.out.println("Proporción respecto base: " + proporcion);
+
+            System.out.println("➡️ Nutrientes antes de sumar: " + totalesToString(totales));
+
+            totales.setCalorias(totales.getCalorias() + safeFloat(alimento.getCalorias()) * proporcion);
+            totales.setProteinas(totales.getProteinas() + safeFloat(alimento.getProteinas()) * proporcion);
+            totales.setCarbohidratos(totales.getCarbohidratos() + safeFloat(alimento.getCarbohidratos()) * proporcion);
+            totales.setGrasas(totales.getGrasas() + safeFloat(alimento.getGrasas()) * proporcion);
+            totales.setAzucares(totales.getAzucares() + safeFloat(alimento.getAzucares()) * proporcion);
+            totales.setFibra(totales.getFibra() + safeFloat(alimento.getFibra()) * proporcion);
+            totales.setSodio(totales.getSodio() + safeFloat(alimento.getSodio()) * proporcion);
+            totales.setGrasasSaturadas(totales.getGrasasSaturadas() + safeFloat(alimento.getGrasasSaturadas()) * proporcion);
+
+            System.out.println("✅ Nutrientes después de sumar: " + totalesToString(totales));
+        }
+
+        return totales;
+    }
+
+    private String totalesToString(NutrientesTotalesDTO n) {
+        return String.format("Calorías=%.2f, Prot=%.2f, Carb=%.2f, Grasas=%.2f, Azúcar=%.2f, Fibra=%.2f, Sodio=%.2f, GrasasSat=%.2f",
+                n.getCalorias(), n.getProteinas(), n.getCarbohidratos(), n.getGrasas(),
+                n.getAzucares(), n.getFibra(), n.getSodio(), n.getGrasasSaturadas());
+    }
+
+
     public List<EstadisticaPorMesDTO> obtenerConsumoPorMesDelAnio(Long idUsuario, int anio) {
         System.out.println("📊 [DEBUG] Iniciando obtención de consumo mensual para Usuario ID: " + idUsuario + " | Año: " + anio);
 

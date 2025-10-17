@@ -18,6 +18,7 @@ public class AlimentoController {
     @Autowired
     public AlimentoService alimentoService;
 
+    // Usando
     @GetMapping("/buscar/{idAlimento}")
     public ResponseEntity<Alimento> listarPorIdAlimento(@PathVariable long idAlimento){
         try {
@@ -63,6 +64,7 @@ public class AlimentoController {
         }
     }
 
+    // Usando
     @GetMapping("/alimentoCategoria/{categoria}")
     public ResponseEntity<List<Alimento>> obtenerAlimentosPorCategoria(@PathVariable String categoria) {
         List<Alimento> alimentos = alimentoService.obtenerAlimentosPorCategoria(categoria);
@@ -95,6 +97,7 @@ public class AlimentoController {
         }
     }
 
+    // Usando
     @GetMapping("/listar")
     public ResponseEntity<List<Alimento>> listarTodos() {
         return ResponseEntity.ok(alimentoService.listarAlimentos());
@@ -106,18 +109,21 @@ public class AlimentoController {
         return alimento != null ? ResponseEntity.ok(alimento) : ResponseEntity.notFound().build();
     }
 
+    // Usando
     @PostMapping("/favoritoAgregar/{idUsuario}/{idAlimento}")
     public ResponseEntity<?> agregarFavorito(@PathVariable Long idUsuario, @PathVariable Long idAlimento) {
         alimentoService.agregarFavorito(idUsuario, idAlimento);
         return ResponseEntity.ok().build();
     }
 
+    // Usando
     @DeleteMapping("/favoritoEliminar/{idUsuario}/{idAlimento}")
     public ResponseEntity<?> eliminarFavorito(@PathVariable Long idUsuario, @PathVariable Long idAlimento) {
         alimentoService.eliminarFavorito(idUsuario, idAlimento);
         return ResponseEntity.ok().build();
     }
 
+    // Usando
     @GetMapping("/favoritos/{idUsuario}")
     public ResponseEntity<List<Alimento>> obtenerFavoritos(@PathVariable Long idUsuario) {
         return ResponseEntity.ok(alimentoService.obtenerFavoritos(idUsuario));

@@ -54,5 +54,4 @@ public class RegistroAlimento {
     @JoinColumn(name="id_alimento", nullable = false)
     //@JsonIgnore
     private Alimento alimento;
-
 }

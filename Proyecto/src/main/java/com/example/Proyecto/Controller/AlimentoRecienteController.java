@@ -26,6 +26,7 @@ public class AlimentoRecienteController {
     @Autowired
     private AlimentoRepository alimentoRepository;
 
+    // Usando
     @PostMapping("/registrar/{idUsuario}/{idAlimento}")
     public ResponseEntity<?> registrarReciente(@PathVariable Long idUsuario, @PathVariable Long idAlimento) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(idUsuario);
@@ -39,17 +40,20 @@ public class AlimentoRecienteController {
         }
     }
 
+    // Usando
     @GetMapping("/consultar/{idUsuario}")
     public ResponseEntity<List<AlimentoRecienteDTO>> obtenerRecientes(@PathVariable Long idUsuario) {
         return ResponseEntity.ok(alimentoRecienteService.obtenerRecientesPorUsuario(idUsuario));
     }
 
+    // Usando
     @DeleteMapping("/eliminarTodos/{idUsuario}")
     public ResponseEntity<?> eliminarTodosRecientes(@PathVariable Long idUsuario) {
         alimentoRecienteService.eliminarTodosPorUsuario(idUsuario);
         return ResponseEntity.ok("Recientes eliminados");
     }
 
+    // Usando
     @DeleteMapping("/eliminar/{idUsuario}/{idAlimento}")
     public ResponseEntity<?> eliminarReciente(
             @PathVariable Long idUsuario,
