@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -125,7 +126,8 @@ public class RegistroAlimentoService {
         registro.setTamanoOriginal(cantidadOriginal);     // original
         registro.setUnidadOriginal(unidadOrigen);         // original
         registro.setMomentoDelDia(dto.getMomentoDelDia());
-        registro.setConsumidoEn(LocalDateTime.now());
+        //registro.setConsumidoEn(LocalDateTime.now());
+        registro.setConsumidoEn(LocalDateTime.now(ZoneId.of("America/Bogota")));
 
         RegistroAlimento registroGuardado = registroAlimentoRepository.save(registro);
         // Actualizar estadísticas diarias justo después de guardar el registro
