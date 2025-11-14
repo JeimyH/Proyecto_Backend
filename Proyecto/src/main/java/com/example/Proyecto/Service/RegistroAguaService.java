@@ -108,7 +108,7 @@ public class RegistroAguaService {
 
     public RegistroAgua obtenerRegistroDeHoy(Long idUsuario) {
         return registroAguaRepository
-                .findByUsuario_IdUsuarioAndFecha(idUsuario, LocalDate.now())
+                .findByUsuario_IdUsuarioAndFecha(idUsuario, LocalDate.now(ZoneId.of("America/Bogota")))
                 .orElse(null);
     }
 
