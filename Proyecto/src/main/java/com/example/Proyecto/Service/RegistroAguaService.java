@@ -95,7 +95,7 @@ public class RegistroAguaService {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = LocalDate.now(ZoneId.of("America/Bogota"));
 
         RegistroAgua registro = registroAguaRepository.findByUsuario_IdUsuarioAndFecha(idUsuario, hoy)
                 .orElse(new RegistroAgua());
