@@ -114,7 +114,7 @@ public class RegistroAguaService {
     }
 
     public void eliminarRegistroDeHoy(Long idUsuario) {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = LocalDate.now(ZoneId.of("America/Bogota"));
         registroAguaRepository.eliminarRegistroPorUsuarioYFecha(idUsuario, hoy);
     }
 
