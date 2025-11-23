@@ -31,4 +31,6 @@ public interface AlimentoRepository extends JpaRepository<Alimento, Long> {
 
     @Query(value = "SELECT url_imagen FROM Alimento WHERE nombre_alimento = :nombre LIMIT 1", nativeQuery = true)
     String encontrarUrlImagenPorNombre(@Param("nombre") String nombre);
+
+    List<Alimento> findAllByOrderByNombreAlimentoAsc();
 }
