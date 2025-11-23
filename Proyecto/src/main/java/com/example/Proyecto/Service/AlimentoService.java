@@ -132,7 +132,8 @@ public class AlimentoService {
     }
 
     public List<Alimento> listarAlimentos() {
-        return alimentoRepository.findAll();
+        //return alimentoRepository.findAll();
+        return alimentoRepository.findAllByOrderByNombreAlimentoAsc();
     }
 
     public void agregarFavorito(Long idUsuario, Long idAlimento) {
