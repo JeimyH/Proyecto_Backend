@@ -91,7 +91,11 @@ public class RegistroAlimentoService {
                 "lonja", "filete", "puñado", "cucharada", "cucharadita", "puñado", "diente",
                 "taza arilos", "gajo", "taza cubos", "lata pequeña", "taza cocidos", "media docena",
                 "taza con vaina", "taza sin vaina", "chuleta", "lata", "unidad mediana", "unidad pequeña",
-                "unidad grande", "sobre polvo", "taza preparada", "bola", "taza rallado"
+                "unidad grande", "sobre polvo", "taza preparada", "bola", "taza rallado", "mitad", "vaina", "cucharada jugo",
+                "hoja", "tallo", "taza cocida", "cucharada rallada", "taza picado", "unidad mediana",
+                "taza puré", "patacones", "tajadas", "ramillete", "cucharada picado", "ramito", "ramita",
+                "cucharada hojas", "taza hojas", "unidad pequeña", "taza cocido", "taza crudo", "taza rebanado",
+                "cucharada rebanado", "atado", "manojo"
         );
 
         if (!unidadesValidas.contains(unidadOrigen)) {
