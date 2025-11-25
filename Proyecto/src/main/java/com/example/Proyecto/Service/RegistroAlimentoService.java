@@ -86,16 +86,20 @@ public class RegistroAlimentoService {
 
         // Validación explícita de unidad original (evita valores inválidos)
         List<String> unidadesValidas = List.of(
-                "mg", "gramos", "kg", "ml", "l", "tsp", "tbsp", "cup", "onza", "lb",
-                "unidad", "porción", "rebanada", "pieza", "taza", "vaso", "bloque",
-                "lonja", "filete", "puñado", "cucharada", "cucharadita", "puñado", "diente",
-                "taza arilos", "gajo", "taza cubos", "lata pequeña", "taza cocidos", "media docena",
+                "mg", "gramos", "kg", "ml", "l", "onza", "lb", "loncha",
+                "unidad", "porción", "rebanada", "pieza", "taza", "vaso", "bloque", "tira",
+                "lonja", "filete", "puñado", "cucharada", "cucharadita", "diente", "anillo",
+                "taza arilos", "gajo", "taza cubos", "taza cubo","lata pequeña", "taza cocidos", "media docena",
                 "taza con vaina", "taza sin vaina", "chuleta", "lata", "unidad mediana", "unidad pequeña",
-                "unidad grande", "sobre polvo", "taza preparada", "bola", "taza rallado", "mitad", "vaina", "cucharada jugo",
-                "hoja", "tallo", "taza cocida", "cucharada rallada", "taza picado", "unidad mediana",
-                "taza puré", "patacones", "tajadas", "ramillete", "cucharada picado", "ramito", "ramita",
-                "cucharada hojas", "taza hojas", "unidad pequeña", "taza cocido", "taza crudo", "taza rebanado",
-                "cucharada rebanado", "atado", "manojo"
+                "unidad grande", "sobre polvo", "taza preparada", "bola", "taza rallado", "mitad", "vaina",
+                "cucharada jugo", "hoja", "tallo", "taza cocida", "cucharada rallada", "taza picado",
+                "taza puré", "patacones", "tajada", "ramillete", "cucharada picado", "taza migas",
+                "cucharada hojas", "taza hojas", "taza cocido", "taza crudo", "taza rebanado",
+                "cucharada rebanado", "atado", "manojo", "ramito", "ramita", "unidad mazorca", "taza granos",
+                "pieza grande", "arepa pequeña", "arepa mediana", "paquete pequeño", "paquete mediano",
+                "paquete individual", "paquete grande", "loncha gruesa", "taza picada", "cucharada picada",
+                "taza cruda", "taza rebanada", "cucharada rebanada", "taza rallada", "arepa grande", 
+                "paquete", "cuadrado grande", "cuadrado pequeño"
         );
 
         if (!unidadesValidas.contains(unidadOrigen)) {
