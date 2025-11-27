@@ -45,6 +45,26 @@ public class RegistroAlimentoController {
         }
     }
 
+    @PostMapping("/registrochat")
+    public ResponseEntity<?> registrarAlimentochat(@RequestBody RegistroAlimentoEntradaDTO dto) {
+        try {
+            RegistroAlimento registro = registroAlimentoService.guardarRegistrochat(dto);
+            return ResponseEntity.ok(registro);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error al registrar el alimento"));
+        }
+    }
+
     @GetMapping("/recientes/{idUsuario}")
     public ResponseEntity<List<RegistroAlimento>> getRecientesPorUsuario(@PathVariable Long idUsuario) {
         List<RegistroAlimento> lista = registroAlimentoService.obtenerRecientesPorUsuario(idUsuario);
