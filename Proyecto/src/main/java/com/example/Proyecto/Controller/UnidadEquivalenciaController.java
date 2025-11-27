@@ -78,4 +78,10 @@ public class UnidadEquivalenciaController {
         UnidadEquivalencia actualizada = unidadEquivalenciaService.crearOActualizarEquivalencia(dto);
         return ResponseEntity.ok(actualizada);
     }
+
+    @PostMapping("/actualizarchat")
+    public ResponseEntity<UnidadEquivalencia> actualizarEquivalenciachat(@RequestBody UnidadEquivalenciaDTO dto) {
+        UnidadEquivalencia actualizada = unidadEquivalenciaService.crearOActualizarEquivalenciaChat(dto);
+        return ResponseEntity.ok(actualizada);
+    }
 }
