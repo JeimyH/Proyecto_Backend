@@ -81,13 +81,14 @@ public class RegistroAlimentoService {
         Alimento alimento = alimentoRepository.findById(dto.getIdAlimento())
                 .orElseThrow(() -> new RuntimeException("Alimento no encontrado"));
 
-        //String unidadOrigen = dto.getUnidadOriginal().toLowerCase();  // <- original
+        String unidadOrigen = dto.getUnidadOriginal().toLowerCase().trim();  // <- original
         // ✅ Normalizar la unidad: quita tildes pero conserva la ñ, convierte a minúscula y elimina espacios
-        String unidadOrigen = Normalizer.normalize(dto.getUnidadOriginal(), Normalizer.Form.NFD)
+        /*String unidadOrigen = Normalizer.normalize(dto.getUnidadOriginal(), Normalizer.Form.NFD)
                 .replaceAll("([\\p{M}&&[^~\\u0301]])", "") // elimina diacríticos excepto la tilde de ñ
                 .replace("ñ", "ñ") // corrige la ñ que queda descompuesta en algunos casos
                 .toLowerCase()
                 .trim();
+        */
         String unidadDestino = "gramos";
         float cantidadOriginal = dto.getTamanoOriginal();
 
@@ -165,7 +166,7 @@ public class RegistroAlimentoService {
         Alimento alimento = alimentoRepository.findById(dto.getIdAlimento())
                 .orElseThrow(() -> new RuntimeException("Alimento no encontrado"));
 
-        String unidadOrigen = dto.getUnidadOriginal().toLowerCase();  // <- original
+        String unidadOrigen = dto.getUnidadOriginal().toLowerCase().trim();  // <- original
         String unidadDestino = "gramos";
         float cantidadOriginal = dto.getTamanoOriginal();
 
