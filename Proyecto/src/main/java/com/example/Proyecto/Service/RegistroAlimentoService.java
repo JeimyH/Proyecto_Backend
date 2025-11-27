@@ -84,10 +84,88 @@ public class RegistroAlimentoService {
         //String unidadOrigen = dto.getUnidadOriginal().toLowerCase();  // <- original
         // ✅ Normalizar la unidad: quita tildes pero conserva la ñ, convierte a minúscula y elimina espacios
         String unidadOrigen = Normalizer.normalize(dto.getUnidadOriginal(), Normalizer.Form.NFD)
-                .replaceAll("([\\p{M}&&[^~]])", "") // elimina diacríticos excepto la tilde de ñ
+                .replaceAll("([\\p{M}&&[^~\\u0301]])", "") // elimina diacríticos excepto la tilde de ñ
                 .replace("ñ", "ñ") // corrige la ñ que queda descompuesta en algunos casos
                 .toLowerCase()
                 .trim();
+        String unidadDestino = "gramos";
+        float cantidadOriginal = dto.getTamanoOriginal();
+
+        // Validación explícita de unidad original (evita valores inválidos)
+        List<String> unidadesValidas = List.of(
+                "mg", "gramos", "kg", "ml", "l", "onza", "lb", "loncha",
+                "unidad", "porción", "rebanada", "pieza", "taza", "vaso", "bloque", "tira",
+                "lonja", "filete", "puñado", "cucharada", "cucharadita", "diente", "anillo",
+                "taza arilos", "gajo", "taza cubos", "taza cubo","lata pequeña", "taza cocidos", "media docena",
+                "taza con vaina", "taza sin vaina", "chuleta", "lata", "unidad mediana", "unidad pequeña",
+                "unidad grande", "sobre polvo", "taza preparada", "bola", "taza rallado", "mitad", "vaina",
+                "cucharada jugo", "hoja", "tallo", "taza cocida", "cucharada rallada", "taza picado",
+                "taza puré", "patacones", "tajada", "ramillete", "cucharada picado", "taza migas",
+                "cucharada hojas", "taza hojas", "taza cocido", "taza crudo", "taza rebanado",
+                "cucharada rebanado", "atado", "manojo", "ramito", "ramita", "unidad mazorca", "taza granos",
+                "pieza grande", "arepa pequeña", "arepa mediana", "paquete pequeño", "paquete mediano",
+                "paquete individual", "paquete grande", "loncha gruesa", "taza picada", "cucharada picada",
+                "taza cruda", "taza rebanada", "cucharada rebanada", "taza rallada", "arepa grande",
+                "paquete", "cuadrado grande", "cuadrado pequeño"
+        );
+
+        if (!unidadesValidas.contains(unidadOrigen)) {
+            throw new IllegalArgumentException("Unidad original inválida: " + unidadOrigen);
+        }
+
+        float cantidadEnGramos;
+
+        Optional<UnidadEquivalencia> equivalenciaOpt = unidadEquivalenciaRepository
+                .findByAlimentoAndUnidadOrigenAndUnidadDestino(alimento, unidadOrigen, unidadDestino);
+
+        if (equivalenciaOpt.isPresent()) {
+            float factor = equivalenciaOpt.get().getFactorConversion();
+            cantidadEnGramos = cantidadOriginal * factor;
+        } else {
+            float factorEstimado = 1.0f;
+            UnidadEquivalencia nuevaEquivalencia = new UnidadEquivalencia();
+            nuevaEquivalencia.setAlimento(alimento);
+            nuevaEquivalencia.setUnidadOrigen(unidadOrigen);
+            nuevaEquivalencia.setUnidadDestino(unidadDestino);
+            nuevaEquivalencia.setFactorConversion(factorEstimado);
+            unidadEquivalenciaRepository.save(nuevaEquivalencia);
+
+            cantidadEnGramos = cantidadOriginal * factorEstimado;
+        }
+
+        RegistroAlimento registro = new RegistroAlimento();
+        registro.setUsuario(usuario);
+        registro.setAlimento(alimento);
+        registro.setTamanoPorcion(cantidadEnGramos);      // convertido
+        registro.setUnidadMedida(unidadDestino);          // convertido (gramos)
+        registro.setTamanoOriginal(cantidadOriginal);     // original
+        registro.setUnidadOriginal(unidadOrigen);         // original
+        registro.setMomentoDelDia(dto.getMomentoDelDia());
+        //registro.setConsumidoEn(LocalDateTime.now());
+        registro.setConsumidoEn(LocalDateTime.now(ZoneId.of("America/Bogota")));
+
+        RegistroAlimento registroGuardado = registroAlimentoRepository.save(registro);
+        // Actualizar estadísticas diarias justo después de guardar el registro
+        LocalDate fechaRegistro = registroGuardado.getConsumidoEn().toLocalDate();
+        estadisticasService.guardarEstadisticaDiaria(usuario.getIdUsuario(), fechaRegistro);
+
+        // Actualizar estadísticas mensuales
+        int anio = fechaRegistro.getYear();
+        int mes = fechaRegistro.getMonthValue();
+        estadisticasService.guardarEstadisticaMensual(usuario.getIdUsuario(), anio, mes);
+
+        return registroGuardado;
+    }
+
+    @Transactional
+    public RegistroAlimento guardarRegistrochat(RegistroAlimentoEntradaDTO dto) {
+        Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Alimento alimento = alimentoRepository.findById(dto.getIdAlimento())
+                .orElseThrow(() -> new RuntimeException("Alimento no encontrado"));
+
+        String unidadOrigen = dto.getUnidadOriginal().toLowerCase();  // <- original
         String unidadDestino = "gramos";
         float cantidadOriginal = dto.getTamanoOriginal();
 
