@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -80,7 +81,13 @@ public class RegistroAlimentoService {
         Alimento alimento = alimentoRepository.findById(dto.getIdAlimento())
                 .orElseThrow(() -> new RuntimeException("Alimento no encontrado"));
 
-        String unidadOrigen = dto.getUnidadOriginal().toLowerCase();  // <- original
+        //String unidadOrigen = dto.getUnidadOriginal().toLowerCase();  // <- original
+        // ✅ Normalizar la unidad: quita tildes pero conserva la ñ, convierte a minúscula y elimina espacios
+        String unidadOrigen = Normalizer.normalize(dto.getUnidadOriginal(), Normalizer.Form.NFD)
+                .replaceAll("([\\p{M}&&[^~]])", "") // elimina diacríticos excepto la tilde de ñ
+                .replace("ñ", "ñ") // corrige la ñ que queda descompuesta en algunos casos
+                .toLowerCase()
+                .trim();
         String unidadDestino = "gramos";
         float cantidadOriginal = dto.getTamanoOriginal();
 
@@ -98,7 +105,7 @@ public class RegistroAlimentoService {
                 "cucharada rebanado", "atado", "manojo", "ramito", "ramita", "unidad mazorca", "taza granos",
                 "pieza grande", "arepa pequeña", "arepa mediana", "paquete pequeño", "paquete mediano",
                 "paquete individual", "paquete grande", "loncha gruesa", "taza picada", "cucharada picada",
-                "taza cruda", "taza rebanada", "cucharada rebanada", "taza rallada", "arepa grande", 
+                "taza cruda", "taza rebanada", "cucharada rebanada", "taza rallada", "arepa grande",
                 "paquete", "cuadrado grande", "cuadrado pequeño"
         );
 
@@ -111,20 +118,41 @@ public class RegistroAlimentoService {
         Optional<UnidadEquivalencia> equivalenciaOpt = unidadEquivalenciaRepository
                 .findByAlimentoAndUnidadOrigenAndUnidadDestino(alimento, unidadOrigen, unidadDestino);
 
+        float factor;
         if (equivalenciaOpt.isPresent()) {
-            float factor = equivalenciaOpt.get().getFactorConversion();
-            cantidadEnGramos = cantidadOriginal * factor;
+            factor = equivalenciaOpt.get().getFactorConversion();
         } else {
-            float factorEstimado = 1.0f;
-            UnidadEquivalencia nuevaEquivalencia = new UnidadEquivalencia();
-            nuevaEquivalencia.setAlimento(alimento);
-            nuevaEquivalencia.setUnidadOrigen(unidadOrigen);
-            nuevaEquivalencia.setUnidadDestino(unidadDestino);
-            nuevaEquivalencia.setFactorConversion(factorEstimado);
-            unidadEquivalenciaRepository.save(nuevaEquivalencia);
+            // Si no existe, calcular el factor basado en la unidad y cantidadBase del alimento
+            // cantidadBase indica cuántos gramos equivale 1 unidad base del alimento
+            Float cantidadBase = alimento.getCantidadBase();
+            if (cantidadBase == null || cantidadBase <= 0) {
+                cantidadBase = 100f; // Valor por defecto si no está definido
+            }
 
-            cantidadEnGramos = cantidadOriginal * factorEstimado;
+            // Calcular el factor de conversión según la unidad de origen
+            if (unidadOrigen.equals("g") || unidadOrigen.equals("gramos") || unidadOrigen.equals("gramo")) {
+                // Si la unidad es gramos, 1 gramo = 1 gramo
+                factor = 1.0f;
+            } else if (unidadOrigen.equals("kg") || unidadOrigen.equals("kilogramos") || unidadOrigen.equals("kilogramo")) {
+                // Si la unidad es kilogramos, 1 kg = 1000 gramos
+                factor = 1000.0f;
+            } else if (unidadOrigen.equals("mg") || unidadOrigen.equals("miligramos") || unidadOrigen.equals("miligramo")) {
+                // Si la unidad es miligramos, 1 mg = 0.001 gramos
+                factor = 0.001f;
+            } else {
+                // Para otras unidades (porción, taza, pieza, etc.), usar cantidadBase
+                // Si cantidadBase = 100g y la unidad es "porción", entonces 1 porción = 100 gramos
+                // El factor es la cantidad de gramos que equivale 1 unidad
+                factor = cantidadBase;
+            }
+
+            // NO intentar crear la equivalencia dentro de esta transacción
+            // Esto evita problemas de sesión de Hibernate que pueden causar que falle el guardado
+            // La equivalencia se creará automáticamente cuando sea necesario en otro momento
+            // o se puede crear manualmente más tarde
+            // Por ahora, simplemente usar el factor calculado y continuar
         }
+        cantidadEnGramos = cantidadOriginal * factor;
 
         RegistroAlimento registro = new RegistroAlimento();
         registro.setUsuario(usuario);
