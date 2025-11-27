@@ -101,8 +101,8 @@ public class UnidadEquivalenciaService {
         }
     }
 
-        @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
-    public UnidadEquivalencia crearOActualizarEquivalencia(UnidadEquivalenciaDTO dto) {
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    public UnidadEquivalencia crearOActualizarEquivalenciaChat(UnidadEquivalenciaDTO dto) {
         Alimento alimento = alimentoRepository.findById(dto.getIdAlimento())
                 .orElseThrow(() -> new RuntimeException("Alimento no encontrado"));
 
@@ -181,7 +181,7 @@ public class UnidadEquivalenciaService {
             }
         }
     }
-/*
+
     @Transactional
     public UnidadEquivalencia crearOActualizarEquivalencia(UnidadEquivalenciaDTO dto) {
         Alimento alimento = alimentoRepository.findById(dto.getIdAlimento())
@@ -202,6 +202,4 @@ public class UnidadEquivalenciaService {
 
         return unidadEquivalenciaRepository.save(equivalencia);
     }
-
- */
 }
